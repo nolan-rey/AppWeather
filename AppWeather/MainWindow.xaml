@@ -20,13 +20,13 @@
         <Image Margin="20" Source="partially-cloudy.png"/>
         <Border Grid.Row="1" Grid.ColumnSpan="2" Background="#152951"/>
         <StackPanel Grid.Column="1" Margin="40,0,0,0" VerticalAlignment="Center">
-            <TextBlock Foreground="White" FontSize="25" Text="Today - 64° F"/>
-            <TextBlock Foreground="White" FontSize="25" Text="Partially Cloudy"/>
-            <TextBlock Foreground="White" FontSize="25" Text="Precipitation: 25%"/>
+            <TextBlock Name="TB_Temp" Foreground="White" FontSize="25" Text="Température : "/>
+            <TextBlock Name="TB_Humidity" Foreground="White" FontSize="25" Text="Humidity :"/>
+            <TextBlock Name="TB_Pression" Foreground="White" FontSize="25" Text="Precipitation:"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal"
             HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock Foreground="White" FontSize="25" Text="High: 66°" Margin="0,0,20,0"/>
+            <TextBlock Name="TB_" Foreground="White" FontSize="25" Text="High: 66°" Margin="0,0,20,0"/>
             <TextBlock Foreground="White" FontSize="25" Text="Low: 43°" Margin="0,0,20,0"/>
             <TextBlock Foreground="White" FontSize="25" Text="Feels like: 63°"/>
         </StackPanel>
