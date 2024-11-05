@@ -26,9 +26,9 @@
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal"
             HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock Name="TB_" Foreground="White" FontSize="25" Text="High: 66°" Margin="0,0,20,0"/>
-            <TextBlock Foreground="White" FontSize="25" Text="Low: 43°" Margin="0,0,20,0"/>
-            <TextBlock Foreground="White" FontSize="25" Text="Feels like: 63°"/>
+            <TextBlock Name="TB_TempHight" Foreground="White" FontSize="25" Text="High: " Margin="0,0,20,0"/>
+            <TextBlock Name="TB_TempLow" Foreground="White" FontSize="25" Text="Low:" Margin="0,0,20,0"/>
+            <TextBlock Name="TB_Recentie" Foreground="White" FontSize="25" Text="Feels like:"/>
         </StackPanel>
     </Grid>
 </Window>

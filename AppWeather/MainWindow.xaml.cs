@@ -30,22 +30,29 @@ namespace AppWeather
 
         private async void LoadWeatherData()
         {
-            var weatherData = await GetBlogdetails();
+            var weatherData = await GetWeather();
             if (weatherData != null)
             {
                 TB_Temp.Text = $"Température: {weatherData.Main.temp} °C";
                 TB_Humidity.Text = $"Humidité: {weatherData.Main.humidity} %";
                 TB_Pression.Text = $"Préssion: {weatherData.Main.pressure} hPa";
+                TB_TempHight.Text = $"Temp Max: {weatherData.Main.temp_max} °C";
+                TB_TempLow.Text = $"Temp Min: {weatherData.Main.temp_min} °C";
+                TB_Recentie.Text = $"Ressentie: {weatherData.Main.feels_like} °C";
 
             }
             else
             {
                 TB_Temp.Text = "Erreur de chargement des données";
                 TB_Humidity.Text = "Erreur de chargement des données";
+                TB_Pression.Text = "Erreur de chargement des données";
+                TB_TempHight.Text = "Erreur de chargement des données";
+                TB_TempLow.Text = "Erreur de chargement des données";
+                TB_Recentie.Text = "Erreur de chargement des données";
             }
         }
 
-        public async Task<WeatherResponse> GetBlogdetails()
+        public async Task<WeatherResponse> GetWeather()
         {
             HttpClient client = new HttpClient();
             HttpResponseMessage response = await client.GetAsync("https://api.openweathermap.org/data/2.5/weather?q=annecy,fr&appid=c21a75b667d6f7abb81f118dcf8d4611&units=metric");
