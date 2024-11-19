@@ -5,25 +5,24 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Net.Http;
 using Newtonsoft.Json;
 using ApiClasses;
+using System.Windows.Media.Imaging;
+using System.IO;
 
 namespace AppWeather
 {
     public partial class MainWindow : Window
     {
+        // Liste pour stocker les villes déjà utilisées
+        private List<string> cityHistory = new List<string>();
+
         public MainWindow()
         {
             InitializeComponent();
-            LoadWeatherData("Annecy"); // Ville par défaut
+            LoadCityHistory(); // Charge les villes au démarrage
+            _ = LoadWeatherData("Sallanches"); // Ville par défaut
         }
 
         private string FormatDayAndDate(string dayLong, string date)
@@ -41,11 +40,58 @@ namespace AppWeather
             string cityName = CityInput.Text.Trim();
             if (!string.IsNullOrEmpty(cityName))
             {
+                // Charge les données météo pour la ville saisie
                 await LoadWeatherData(cityName);
+                SaveCityIfNew(cityName); // Sauvegarde la ville si elle est nouvelle
+
+                // Ajoute la ville à l'historique si elle n'existe pas déjà
+                if (!cityHistory.Contains(cityName))
+                {
+                    cityHistory.Add(cityName);
+                    CityHistoryComboBox.Items.Add(cityName); // Ajoute la ville dans la ComboBox
+                }
             }
             else
             {
                 MessageBox.Show("Veuillez entrer un nom de ville.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private string cityHistoryFilePath = "cityHistory.txt"; // Nom du fichier pour stocker les villes
+
+        private void LoadCityHistory()
+        {
+            if (File.Exists(cityHistoryFilePath))
+            {
+                var savedCities = File.ReadAllLines(cityHistoryFilePath);
+                cityHistory.AddRange(savedCities.Distinct()); // Ajoute les villes en supprimant les doublons
+                foreach (var city in cityHistory)
+                {
+                    CityHistoryComboBox.Items.Add(city);
+                }
+            }
+        }
+
+        private void SaveCityIfNew(string cityName)
+        {
+            if (!cityHistory.Contains(cityName))
+            {
+                cityHistory.Add(cityName);
+                CityHistoryComboBox.Items.Add(cityName);
+                File.AppendAllText(cityHistoryFilePath, cityName + Environment.NewLine);
+            }
+        }
+
+        private void OnCityHistorySelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CityHistoryComboBox.SelectedItem != null)
+            {
+                // Récupérer la valeur sélectionnée
+                string selectedCity = CityHistoryComboBox.SelectedItem.ToString();
+                MessageBox.Show($"Ville sélectionnée : {selectedCity}");
+
+                // Charger les données météo pour la ville sélectionnée
+                _ = LoadWeatherData(selectedCity);
             }
         }
 
