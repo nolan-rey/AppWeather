@@ -18,13 +18,17 @@ namespace AppWeather
         // Liste pour stocker les villes déjà utilisées
         private List<string> cityHistory = new List<string>();
 
+        // Chemin du fichier pour stocker les villes
+        private string cityHistoryFilePath = "cityHistory.txt";
+
         public MainWindow()
         {
             InitializeComponent();
-            LoadCityHistory(); // Charge les villes au démarrage
-            _ = LoadWeatherData("Sallanches"); // Ville par défaut
+            LoadCityHistory(); // Charge les villes enregistrées au démarrage de l'application
+            _ = LoadWeatherData("Sallanches"); // Charge les données météo pour une ville par défaut
         }
 
+        // Formate le jour et la date en une chaîne lisible
         private string FormatDayAndDate(string dayLong, string date)
         {
             DateTime parsedDate;
@@ -35,16 +39,19 @@ namespace AppWeather
             return $"{dayLong.ToUpper()} {date}";
         }
 
+        // Gestionnaire de clic pour le bouton de recherche de ville
         private async void OnSearchButtonClick(object sender, RoutedEventArgs e)
         {
             string cityName = CityInput.Text.Trim();
             if (!string.IsNullOrEmpty(cityName))
             {
-                // Charge les données météo pour la ville saisie
+                // Charge les données météo pour la ville saisie par l'utilisateur
                 await LoadWeatherData(cityName);
-                SaveCityIfNew(cityName); // Sauvegarde la ville si elle est nouvelle
 
-                // Ajoute la ville à l'historique si elle n'existe pas déjà
+                // Sauvegarde la ville dans l'historique si elle n'existe pas déjà
+                SaveCityIfNew(cityName);
+
+                // Ajoute la ville à l'historique si elle n'y est pas déjà
                 if (!cityHistory.Contains(cityName))
                 {
                     cityHistory.Add(cityName);
@@ -53,18 +60,18 @@ namespace AppWeather
             }
             else
             {
+                // Affiche un message si le champ de texte est vide
                 MessageBox.Show("Veuillez entrer un nom de ville.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
-        private string cityHistoryFilePath = "cityHistory.txt"; // Nom du fichier pour stocker les villes
-
+        // Charge l'historique des villes enregistrées à partir du fichier
         private void LoadCityHistory()
         {
             if (File.Exists(cityHistoryFilePath))
             {
                 var savedCities = File.ReadAllLines(cityHistoryFilePath);
-                cityHistory.AddRange(savedCities.Distinct()); // Ajoute les villes en supprimant les doublons
+                cityHistory.AddRange(savedCities.Distinct()); // Évite les doublons
                 foreach (var city in cityHistory)
                 {
                     CityHistoryComboBox.Items.Add(city);
@@ -72,6 +79,7 @@ namespace AppWeather
             }
         }
 
+        // Sauvegarde la ville dans le fichier si elle est nouvelle
         private void SaveCityIfNew(string cityName)
         {
             if (!cityHistory.Contains(cityName))
@@ -82,19 +90,21 @@ namespace AppWeather
             }
         }
 
+        // Gestionnaire de sélection de ville dans la ComboBox d'historique
         private void OnCityHistorySelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (CityHistoryComboBox.SelectedItem != null)
             {
-                // Récupérer la valeur sélectionnée
+                // Récupère la valeur de la ville sélectionnée
                 string selectedCity = CityHistoryComboBox.SelectedItem.ToString();
                 MessageBox.Show($"Ville sélectionnée : {selectedCity}");
 
-                // Charger les données météo pour la ville sélectionnée
+                // Charge les données météo pour la ville sélectionnée
                 _ = LoadWeatherData(selectedCity);
             }
         }
 
+        // Vérifie si une ville existe à l'aide de l'API
         private async Task<bool> CheckCityExists(string cityName)
         {
             var weatherData = await GetWeather(cityName);
@@ -109,6 +119,7 @@ namespace AppWeather
             }
         }
 
+        // Charge les données météo pour une ville donnée
         private async Task LoadWeatherData(string cityName)
         {
             bool cityExists = await CheckCityExists(cityName);
@@ -121,11 +132,13 @@ namespace AppWeather
                 return;
             }
 
+            // Mise à jour de l'interface utilisateur avec les données météo
             TB_Temp.Text = $"{weatherData.current_condition.tmp} °C";
             TB_Humidity.Text = $"Humidité: {weatherData.current_condition.humidity} %";
             TB_Pression.Text = $"Pression: {weatherData.current_condition.pressure} hPa";
             TB_Localisation.Text = $"{weatherData.city_info.name}";
 
+            // Mise à jour de l'icône de la météo actuelle
             string iconUrl = weatherData.current_condition.icon_big;
             try
             {
@@ -136,12 +149,14 @@ namespace AppWeather
                 Console.WriteLine($"Erreur lors du chargement de l'image: {ex.Message}");
             }
 
+            // Mise à jour des prévisions pour les jours suivants
             TB_Day_Tomorrow.Text = FormatDayAndDate(weatherData.fcst_day_1.day_long, weatherData.fcst_day_1.date);
             TB_Temp_Day.Text = $"{weatherData.fcst_day_1.tmin} °C / {weatherData.fcst_day_1.tmax} °C";
             string iconWeatherNextDay = weatherData.fcst_day_1.icon;
             Next_Day_Icon.Source = new BitmapImage(new Uri(iconWeatherNextDay));
             TB_Weather_NextDay.Text = weatherData.fcst_day_1.condition;
 
+            // Prévisions pour les jours suivants (jusqu'à 4 jours)
             TB_Day_AfterTomorrow.Text = FormatDayAndDate(weatherData.fcst_day_2.day_long, weatherData.fcst_day_2.date);
             TB_Temp_AfterDay.Text = $"{weatherData.fcst_day_2.tmin} °C / {weatherData.fcst_day_2.tmax} °C";
             string iconWeatherAfterNextDay = weatherData.fcst_day_2.icon;
@@ -161,6 +176,7 @@ namespace AppWeather
             TB_Weather_4Days.Text = weatherData.fcst_day_4.condition;
         }
 
+        // Récupère les données météo pour une ville donnée
         public async Task<WeatherResponse> GetWeather(string cityName)
         {
             using (HttpClient client = new HttpClient())
@@ -171,7 +187,7 @@ namespace AppWeather
                     if (response.IsSuccessStatusCode)
                     {
                         var content = await response.Content.ReadAsStringAsync();
-                        Console.WriteLine(content); // Ajoutez cette ligne pour afficher le contenu de la réponse
+                        Console.WriteLine(content); // Affiche le contenu de la réponse pour le débogage
                         if (string.IsNullOrWhiteSpace(content) || content.Contains("\"errors\""))
                         {
                             MessageBox.Show($"La ville '{cityName}' n'existe pas ou les données sont indisponibles.", "Erreur de données", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -197,6 +213,7 @@ namespace AppWeather
     }
 }
 
+// Classes pour désérialiser la réponse de l'API météo
 public class WeatherResponse
 {
     public CurrentCondition current_condition { get; set; }
